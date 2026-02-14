@@ -9,11 +9,11 @@ export class Game5 {
         this.stars = [];
         this.collectedCount = 0;
         
-        // Список твоих комплиментов
+        // ДОБАВИЛ СМАЙЛИКИ ❤️
         this.compliments = [
-            "Любимая", "Нежная", "Моя душа", "Самая лучшая", 
-            "Красивая", "Добрая", "Единственная", "Сияющая",
-            "Моё счастье", "Целый мир"
+            "Любимая ❤️", "Нежная ❤️", "Моя душа ❤️", "Самая лучшая ❤️", 
+            "Красивая ❤️", "Добрая ❤️", "Единственная ❤️", "Сияющая ❤️",
+            "Моё счастье ❤️", "Целый мир ❤️"
         ];
         
         this.activeText = "";
@@ -45,7 +45,10 @@ export class Game5 {
                 size: 35,
                 text: this.compliments[i],
                 collected: false,
-                pulse: Math.random() * Math.PI
+                pulse: Math.random() * Math.PI,
+                // УСЛОЖНЕНИЕ: Задаем каждой звезде скорость случайного дрейфа
+                vx: (Math.random() - 0.5) * 2.5,
+                vy: (Math.random() - 0.5) * 2.5
             });
         }
     }
@@ -65,12 +68,21 @@ export class Game5 {
         this.stars.forEach(s => {
             if (!s.collected) {
                 s.pulse += 0.04;
+                
+                // ЛОГИКА ДРЕЙФА ЗВЕЗД
+                s.x += s.vx;
+                s.y += s.vy;
+                
+                // Отталкивание от краев экрана
+                if (s.x <= 20 || s.x >= this.canvas.width - 20) s.vx *= -1;
+                if (s.y <= 40 || s.y >= this.canvas.height - 100) s.vy *= -1;
+
                 const dist = Math.hypot(this.player.x - s.x, this.player.y - s.y);
                 if (dist < 45) {
                     s.collected = true;
                     this.collectedCount++;
                     this.activeText = s.text;
-                    this.textTimer = 120; // Текст теперь висит ~2 секунды (при 60fps)
+                    this.textTimer = 120; // Текст висит
                 }
             }
         });
@@ -83,11 +95,11 @@ export class Game5 {
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // 1. Устанавливаем фирменный розовый фон
+        // Розовый фон
         this.ctx.fillStyle = "#ff9ebb";
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Добавим немного "звездной пыли" на фон (светлые точки)
+        // Звездная пыль
         this.ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
         for(let i=0; i<20; i++) {
             this.ctx.beginPath();
@@ -95,7 +107,7 @@ export class Game5 {
             this.ctx.fill();
         }
 
-        // 2. Рисуем звезды
+        // Рисуем звезды
         this.stars.forEach(s => {
             if (!s.collected) {
                 const pSize = s.size + Math.sin(s.pulse) * 6;
@@ -103,20 +115,20 @@ export class Game5 {
             }
         });
 
-        // 3. Рисуем игрока
+        // Рисуем игрока
         this.assets.drawPlayer(this.player.x - this.player.size/2, this.player.y - this.player.size/2, this.player.size);
 
-        // 4. Рисуем комплимент (с эффектом появления/затухания)
+        // Рисуем комплимент
         if (this.textTimer > 0) {
-            // Текст плавно затухает только в последние 30 кадров
             const alpha = this.textTimer > 30 ? 1 : this.textTimer / 30;
             this.ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-            this.ctx.strokeStyle = `rgba(0, 0, 0, ${alpha * 0.5})`; // Тень для читаемости
+            this.ctx.strokeStyle = `rgba(0, 0, 0, ${alpha * 0.5})`; 
             this.ctx.lineWidth = 3;
-            this.ctx.font = "18px 'Press Start 2P'";
+            
+            // Чуть уменьшил шрифт, чтобы текст со смайликом точно влез на мобилку
+            this.ctx.font = "14px 'Press Start 2P'"; 
             this.ctx.textAlign = "center";
             
-            // Рисуем обводку и текст
             this.ctx.strokeText(this.activeText, this.canvas.width / 2, this.canvas.height / 2 - 80);
             this.ctx.fillText(this.activeText, this.canvas.width / 2, this.canvas.height / 2 - 80);
         }

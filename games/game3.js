@@ -5,71 +5,90 @@ export class Game3 {
         this.assets = assets;
         this.onWin = onWin;
         this.input = input;
-        
-        const size = assets.size;
-        this.player = {
-            x: canvas.width / 2 - size / 2,
-            y: canvas.height - size - 60,
-            size,
-            vx: 0
-        };
-        this.hearts = [];
-        this.collected = 0;
-        this.needed = 10;
-        this.frames = 0;
 
-        // Физика движения
-        this.speed = 6;
-        this.accel = 0.4;
-        this.friction = 0.88;
+        this.playerSize = assets.size;
+        this.groundY = canvas.height - 60;
+        
+        this.player = {
+            x: canvas.width / 2 - this.playerSize / 2,
+            y: this.groundY - this.playerSize,
+            speed: 3 // Комфортная, но не слишком быстрая скорость игрока
+        };
+
+        this.items = [];
+        this.score = 0;
+        this.needed = 15;
+        this.spawnTimer = 0;
+        this.itemSpeed = 3.0; // Чуть быстрее старого кода, но медленнее хардкора
     }
 
     update() {
-        this.frames++;
-
-        // Движение по кнопкам из script.js
-        if (this.input.left) this.player.vx -= this.accel;
-        if (this.input.right) this.player.vx += this.accel;
-        
-        this.player.vx *= this.friction;
-        this.player.x += this.player.vx;
-
-        // Ограничение экрана
-        this.player.x = Math.max(0, Math.min(this.canvas.width - this.player.size, this.player.x));
-
-        // Сердечки: реже и медленнее
-        if (this.frames % 80 === 0 && this.hearts.length < 3) {
-            this.hearts.push({
-                x: Math.random() * (this.canvas.width - this.assets.size),
-                y: -50,
-                size: this.assets.size * 0.9,
-                speed: 2 + Math.random() // Медленно
-            });
+        // Управление
+        if (this.input.left && this.player.x > 0) {
+            this.player.x -= this.player.speed;
+        }
+        if (this.input.right && this.player.x < this.canvas.width - this.playerSize) {
+            this.player.x += this.player.speed;
         }
 
-        for (let i = this.hearts.length - 1; i >= 0; i--) {
-            const h = this.hearts[i];
-            h.y += h.speed;
+        // Спавн сердечек
+        this.spawnTimer++;
+        if (this.spawnTimer > 120) { // Оптимальная частота появления
+            this.items.push({
+                x: Math.random() * (this.canvas.width - this.assets.size),
+                y: -this.assets.size,
+                // ВЕРНУЛИ КРУПНЫЙ РАЗМЕР (80% от базового размера)
+                size: this.assets.size * 0.8 
+            });
+            this.spawnTimer = 0;
+        }
 
-            const margin = (this.player.size + h.size) * 0.4;
-            if (Math.abs(this.player.x + this.player.size / 2 - (h.x + h.size / 2)) < margin &&
-                Math.abs(this.player.y + this.player.size / 2 - (h.y + h.size / 2)) < margin) {
-                this.collected++;
-                this.hearts.splice(i, 1);
-            } else if (h.y > this.canvas.height) {
-                this.hearts.splice(i, 1);
+        for (let i = this.items.length - 1; i >= 0; i--) {
+            let it = this.items[i];
+            it.y += this.itemSpeed;
+
+            // Логика поимки (Коллизия)
+            const margin = (this.playerSize + it.size) * 0.4;
+            if (Math.abs(this.player.x + this.playerSize/2 - (it.x + it.size/2)) < margin &&
+                Math.abs(this.player.y + this.playerSize/2 - (it.y + it.size/2)) < margin) {
+                this.score++;
+                this.items.splice(i, 1);
+                
+                if (this.score >= this.needed) {
+                    this.onWin();
+                    return;
+                }
+                continue; // Переходим к следующему сердечку
+            }
+
+            // ЛОГИКА ПРОИГРЫША: Сердечко упало на пол
+            if (it.y > this.groundY) {
+                this.score = 0; // Строго: обнуляем счет!
+                this.items.splice(i, 1);
             }
         }
-
-        if (this.collected >= this.needed) this.onWin();
     }
 
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Рисуем пол
+        this.assets.drawGround(0, this.groundY, this.canvas.width, this.canvas.width);
+        
+        // Рисуем падающие сердечки (теперь они снова крупные!)
+        this.items.forEach(it => this.assets.drawCollectible(it.x, it.y, it.size));
+        
+        // Рисуем увеличенного игрока
+        this.assets.drawPlayer(this.player.x, this.player.y, this.playerSize);
+
+        // Интерфейс
         this.ctx.fillStyle = 'white';
-        this.ctx.font = "12px 'Press Start 2P'";
-        this.ctx.fillText(`❤️: ${this.collected}/${this.needed}`, 20, 40);
-        this.hearts.forEach(h => this.assets.drawCollectible(h.x, h.y, h.size));
-        this.assets.drawPlayer(this.player.x, this.player.y, this.player.size);
+        // Если счет обнулился, текст на секунду станет красным для наглядности
+        if (this.score === 0 && this.items.length > 0) {
+            this.ctx.fillStyle = '#ff4d4d'; 
+        }
+        
+        this.ctx.font = "14px 'Press Start 2P'";
+        this.ctx.fillText(`Собрано: ${this.score}/${this.needed}`, 20, 40);
     }
 }
