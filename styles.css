@@ -1,0 +1,312 @@
+* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
+
+body {
+    background: #ffb3c6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Press Start 2P', cursive;
+    overflow: hidden;
+}
+
+/* Розовый пиксельный фон: градиент + сетка "пикселей" */
+#game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    max-width: 430px;
+    background: linear-gradient(180deg, #ffcce0 0%, #ffb3c6 25%, #ff9ebb 50%, #ff85b3 75%, #ff6b9d 100%);
+    overflow: hidden;
+}
+
+/* Пиксельная сетка поверх фона */
+#game-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255,255,255,0.12) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.12) 1px, transparent 1px);
+    background-size: 8px 8px;
+    pointer-events: none;
+}
+
+#game-container::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.25) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+canvas {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    display: block;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+#reward-screen, #final-screen {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 182, 193, 0.97);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    padding: 20px;
+    text-align: center;
+}
+
+#reward-screen::before, #final-screen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255,105,180,0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,105,180,0.08) 1px, transparent 1px);
+    background-size: 6px 6px;
+    pointer-events: none;
+}
+
+.polaroid {
+    position: relative;
+    z-index: 2;
+    background: #fff;
+    padding: 15px 15px 50px 15px;
+    box-shadow: 0 8px 0 #ff9ebb, 0 12px 20px rgba(233, 69, 96, 0.3);
+    transform: rotate(-2deg);
+    width: 90%;
+    max-width: 320px;
+    border: 4px solid #fff;
+}
+
+.polaroid img, #final-photo {
+    width: 100%;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+    border: 2px solid #ffb3c6;
+    image-rendering: auto;
+}
+
+#reward-text {
+    color: #c73e54;
+    font-size: 10px;
+    margin-top: 15px;
+    line-height: 1.8;
+}
+
+#next-btn {
+    margin-top: 28px;
+    padding: 14px 28px;
+    background: #e94560;
+    color: #fff;
+    border: none;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #b32a42;
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+#next-btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 #b32a42;
+}
+
+#final-screen h1 {
+    position: relative;
+    z-index: 2;
+    color: #e94560;
+    font-size: 16px;
+    margin-bottom: 20px;
+    line-height: 1.6;
+    text-shadow: 2px 2px 0 rgba(255,255,255,0.5);
+}
+
+#final-screen p {
+    position: relative;
+    z-index: 2;
+    color: #c73e54;
+    font-size: 10px;
+    margin-top: 20px;
+}
+
+#final-photo {
+    position: relative;
+    z-index: 2;
+    max-width: 280px;
+    border-radius: 8px;
+}
+
+#music-toggle {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: #e94560;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+    color: #fff;
+    z-index: 5;
+    cursor: pointer;
+    box-shadow: 0 3px 0 #b32a42;
+}
+
+#music-toggle:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #b32a42;
+}
+
+/* Кнопки влево/вправо для игры 2 (над canvas) */
+#move-buttons {
+    position: absolute;
+    bottom: 24px;
+    left: 0;
+    right: 0;
+    z-index: 4;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+    pointer-events: none;
+}
+
+#move-buttons.hidden { display: none !important; }
+
+.move-btn {
+    pointer-events: auto;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 4px solid #fff;
+    background: #e94560;
+    color: #fff;
+    font-size: 28px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #b32a42;
+    transition: transform 0.1s, box-shadow 0.1s;
+    -webkit-tap-highlight-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.move-btn:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #b32a42;
+}
+
+.hidden { display: none !important; }
+
+/* ——— Заглавный экран (пиксель-арт) ——— */
+#title-screen {
+    position: absolute;
+    inset: 0;
+    z-index: 15;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    background: linear-gradient(180deg, #ffcce0 0%, #ffb3c6 40%, #ff9ebb 100%);
+}
+
+#title-screen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255,255,255,0.15) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.15) 1px, transparent 1px);
+    background-size: 8px 8px;
+    pointer-events: none;
+}
+
+.title-pixel-box {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    max-width: 320px;
+}
+
+.title-main {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 22px;
+    color: #e94560;
+    text-shadow: 3px 3px 0 rgba(255,255,255,0.6);
+    margin-bottom: 24px;
+    line-height: 1.6;
+}
+
+.title-sub {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 12px;
+    color: #c73e54;
+    margin-bottom: 20px;
+}
+
+.title-hint {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 8px;
+    color: #ff6b9d;
+    line-height: 1.8;
+    margin-bottom: 32px;
+}
+
+.pixel-btn {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 12px;
+    padding: 16px 32px;
+    background: #e94560;
+    color: #fff;
+    border: 4px solid #fff;
+    box-shadow: 0 6px 0 #b32a42;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.pixel-btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #b32a42;
+}
+
+#play-btn {
+    font-size: 14px;
+}
+
+/* ——— Финальный экран (длинный текст) ——— */
+#final-screen {
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 20px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.final-congrats {
+    font-size: 12px !important;
+    margin-bottom: 16px !important;
+    padding: 0 10px;
+}
+
+#final-message {
+    font-size: 9px !important;
+    line-height: 2 !important;
+    max-width: 340px;
+    margin-top: 16px !important;
+    padding: 0 8px;
+    white-space: pre-line;
+}
+
+#final-screen #final-photo {
+    max-width: 260px;
+    margin-top: 8px;
+}

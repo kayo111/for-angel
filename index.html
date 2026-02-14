@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>For angelsolon ❤️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Заглавный экран -->
+        <div id="title-screen">
+            <div class="title-pixel-box">
+                <h1 class="title-main">For you</h1>
+                <p class="title-sub">angelsolon ❤️</p>
+                <p class="title-hint">5 мини-игр — одно большое чувство</p>
+                <button id="play-btn" class="pixel-btn">ИГРАТЬ</button>
+            </div>
+        </div>
+
+        <canvas id="mainCanvas" class="hidden"></canvas>
+
+        <div id="move-buttons" class="hidden">
+            <button type="button" id="btn-left" class="move-btn" aria-label="Влево">←</button>
+            <button type="button" id="btn-right" class="move-btn" aria-label="Вправо">→</button>
+        </div>
+
+        <div id="reward-screen" class="hidden">
+            <div class="polaroid">
+                <img id="photo-display" src="" alt="Memory">
+                <p id="reward-text">Ты супер!</p>
+                <button id="next-btn" class="pixel-btn">ДАЛЬШЕ</button>
+            </div>
+        </div>
+
+        <div id="final-screen" class="hidden">
+            <h1 class="final-congrats">Поздравляем, вы прошли все мини-игры!</h1>
+            <img id="final-photo" src="images/finale.png" alt="Finale">
+            <p id="final-message">родная... я так благодарен этой жизни за то что ты у меня есть, пусть этот праздник станет один из тысячи наших поводов обнять друг друга и сказать о всех чувствах внутри! я люблю тебя солнышко, и хочу быть с тобою всю жизнь! спасибо тебе за то что ты есть!</p>
+        </div>
+
+        <button id="music-toggle">🎵</button>
+        <audio id="bg-music"></audio>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>
